@@ -1,443 +1,1557 @@
-Python Variables, Objects, and Memory Management
+# Python Variables, Objects, and Memory Management
+
 This guide explains how Python names refer to objects, how built-in types behave, and how Python manages memory. The examples use standard Python syntax and focus on concepts that are useful for beginners and interviews.
 
-1. What is a variable in Python?
-A Python variable is a name bound to an object. It is useful to think of a name as a label referring to an object, rather than a box that contains a value.
-Variables, Memory Allocation, and Deallocation
-Variables let a program give names to values so it can store state, calculate results, and pass data between functions. In both Node.js and Python, a variable is best understood as a name bound to a value. It is not necessarily a box that contains the value itself.
+---
 
-let first = { score: 10 };
-let second = first;
-second.score = 20;
-console.log(first.score); // 20: both names refer to the same object
+# 1. What is a Variable in Python?
+
+A Python variable is a **name bound to an object**.
+
+It is useful to think of a variable as a **label pointing to an object**, rather than a box that physically contains the value.
+
+For example:
+
+```python
+x = 10
+```
+
+Conceptually:
+
+```text
+x ───────> 10
+           object
+```
+
+Here:
+
+* `x` is the name.
+* `10` is an integer object.
+* The name `x` refers to that object.
+
+---
+
+# 2. Variables, Memory Allocation, and Deallocation
+
+Variables allow a program to give names to values so that it can:
+
+* Store state
+* Perform calculations
+* Pass data between functions
+* Access objects later
+
+In Python, assignment creates or changes a **binding between a name and an object**.
+
+## Example
+
+```python
+x = 10
+```
+
+Think of it as:
+
+```text
+Name          Object
+
+ x ─────────> 10
+```
+
+If we later write:
+
+```python
+x = 20
+```
+
+the name `x` is now bound to another object:
+
+```text
+x ─────────> 20
+```
+
+The original integer object `10` was not modified.
+
+---
+
+# 3. Two Names Can Refer to the Same Object
+
+Consider:
+
+```python
 first = {"score": 10}
+
 second = first
+
 second["score"] = 20
-print(first["score"])  # 20: both names refer to the same object
-Scope and lifetime
-Two different lifetimes are useful to distinguish:
 
-Name lifetime: how long a name can be accessed in its scope. A local name usually cannot be used after its function returns.
-Object lifetime: how long the value remains in memory. An object may outlive the function that created it if another reference still points to it, such as a global variable or a closure.
-There is no general expiry timer for variables. When an object is no longer reachable by the program, it becomes eligible for memory reclamation. The runtime controls when reclamation occurs, so becoming unreachable does not always mean memory is released at that exact moment.
+print(first["score"])
+```
 
+Output:
+
+```text
+20
+```
+
+Why?
+
+Because both names refer to the same dictionary object.
+
+Conceptually:
+
+```text
+first  ─────┐
+            ↓
+        {"score": 10}
+            ↑
+second ─────┘
+```
+
+After:
+
+```python
+second["score"] = 20
+```
+
+the same dictionary becomes:
+
+```text
+{"score": 20}
+```
+
+Therefore:
+
+```python
+print(first["score"])
+```
+
+prints:
+
+```text
+20
+```
+
+This is called **aliasing**: multiple names refer to the same object.
+
+---
+
+# 4. Scope and Lifetime
+
+There are two different concepts to understand:
+
+## Name Lifetime
+
+A name is available according to its scope.
+
+For example:
+
+```python
+def test():
+    value = 100
+    print(value)
+```
+
+`value` is a local name inside the function.
+
+Normally, it cannot be accessed outside the function:
+
+```python
+def test():
+    value = 100
+
+test()
+
+print(value)
+```
+
+This produces a `NameError` because `value` is not available in that scope.
+
+---
+
+## Object Lifetime
+
+An object can live longer than the function that created it if another reference still points to it.
+
+Example:
+
+```python
 def make_list():
+
     values = [1, 2, 3]
+
     return values
 
-items = make_list()  # The list stays alive because `items` refers to it.
-Memory allocation in Node.js
-Node.js runs JavaScript using the V8 engine.
 
-Function calls create execution contexts. The engine manages local bindings and may use stack-like storage, registers, or optimized representations. The language does not guarantee that every local variable occupies a literal stack slot.
-Objects, arrays, and functions are generally allocated in memory managed by V8, commonly described as the heap. Primitive values may use engine-specific representations.
-V8's garbage collector finds objects that are no longer reachable from program roots, such as active execution contexts, global values, and retained closures. It can reclaim those objects.
-V8 uses a generational garbage collector. Many short-lived objects are collected in a young generation; objects that survive may be moved to an older generation and collected differently.
-JavaScript code does not control the exact time garbage collection runs.
-A closure can keep a function's local state alive after the function returns:
+items = make_list()
 
-function makeCounter() {
-	let count = 0;
-	return () => ++count;
-}
+print(items)
+```
 
-const next = makeCounter(); // `count` remains reachable through `next`.
-console.log(next()); // 1
-Python variables, objects, and built-in types
-1. What is a variable in Python?
-A variable is a name bound to an object. It is not a box that contains the object itself.
+Output:
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+```text
+[1, 2, 3]
+```
 
-x = 10
-<<<<<<< HEAD Here, x refers to the integer object 10.
+The local name `values` belongs to `make_list()`.
 
-2. Is everything in Python an object?
-In Python, values such as integers, strings, floats, lists, and functions are objects. An object has an identity, a type, and a value.
-Conceptually, x refers to the integer object 10. Assignment binds the name x to that object.
+After the function returns, the local name is no longer available.
 
-2. Are values in Python objects?
-Python's data model represents values as objects. Objects have an identity, a type, and a value.
+However, the list object remains alive because `items` refers to it.
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+Conceptually:
 
-x = 10
-name = "Aishu"
-marks = 85.5
-numbers = [10, 20, 30]
+```text
+make_list()
+    |
+    | creates
+    ↓
+[1, 2, 3]
+    ↑
+    |
+ items
+```
 
-<<<<<<< HEAD
-print(id(x))      # identity for this object's lifetime
-print(type(x))    # <class 'int'>
-print(x)          # value: 10
-id() returns an identity for an object. In CPython, this is commonly its memory address, but Python code should not depend on that implementation detail. type() reports its type, and printing the object displays its value.
+There is no general expiry timer for variables.
 
-3. What are Python's built-in data types?
-Common built-in types can be grouped like this:
-print(id(x)) # Identity for this object's lifetime print(type(x)) # <class 'int'> print(x) # The value: 10
+When an object is no longer reachable, it becomes eligible for memory reclamation. The runtime controls when the memory is actually reclaimed.
 
+---
 
-`id()` returns an object's identity. In CPython it is commonly related to the object's memory address, but Python does not promise that interpretation. `type()` reports the object's type, and evaluating the name shows its value.
+# 5. Memory Allocation in Python
 
-### 3. Built-in data type categories
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+Python manages memory automatically.
 
-- Numeric: `int`, `float`, `complex`
-- Boolean: `bool`
-- Text: `str`
-- Sequences: `list`, `tuple`, `range`
-- Sets: `set`, `frozenset`
-- Mapping: `dict`
-- Binary: `bytes`, `bytearray`, `memoryview`
-<<<<<<< HEAD
-- Null value: `NoneType` (the type of `None`)
+A Python program uses memory for things such as:
 
-## 4. Numeric types
-=======
-- Special value: `None` (whose type is `NoneType`)
+* Integers
+* Strings
+* Lists
+* Dictionaries
+* Functions
+* Objects
+* Runtime information
+* Execution state
 
-### 4. Numeric types
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+In **CPython**, Python's memory allocator manages object memory and obtains memory from the underlying process and operating system.
+
+The exact memory-management implementation can differ between Python implementations.
+
+Therefore, avoid assuming that Python always follows a simple rule such as:
+
+```text
+Variables → Stack
+Objects → Heap
+```
+
+That is only a simplified analogy.
+
+---
+
+# 6. Are Values in Python Objects?
+
+Yes.
+
+Python's data model represents values as objects.
+
+An object has:
+
+1. **Identity**
+2. **Type**
+3. **Value**
+
+Example:
 
 ```python
-age = 25             # int
-count = -10          # int
-price = 99.0         # float
-percentage = 88.75   # float
-z = 3 + 4j           # complex
-<<<<<<< HEAD
+x = 10
 
-5. Boolean values
-Python's Boolean values are True and False (capitalized).
-5. Boolean type
-Boolean values are spelled True and False with initial capitals.
+print(id(x))
+print(type(x))
+print(x)
+```
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+Possible output:
 
+```text
+140721234567890
+<class 'int'>
+10
+```
+
+The exact number returned by `id()` can differ between runs.
+
+---
+
+# 7. Object Identity
+
+`id()` returns an identity for an object during its lifetime.
+
+Example:
+
+```python
+x = 10
+
+print(id(x))
+```
+
+In CPython, the identity is commonly related to the object's memory address, but Python code should not depend on that implementation detail.
+
+The important idea is:
+
+```text
+id()   → identity
+type() → type
+value  → actual value
+```
+
+---
+
+# 8. Built-in Data Types
+
+Python provides many built-in data types.
+
+## Common categories
+
+| Category   | Types                              |
+| ---------- | ---------------------------------- |
+| Numeric    | `int`, `float`, `complex`          |
+| Boolean    | `bool`                             |
+| Text       | `str`                              |
+| Sequences  | `list`, `tuple`, `range`           |
+| Sets       | `set`, `frozenset`                 |
+| Mapping    | `dict`                             |
+| Binary     | `bytes`, `bytearray`, `memoryview` |
+| Null value | `NoneType`                         |
+
+---
+
+# 9. Numeric Types
+
+Python has three common numeric types.
+
+## Integer
+
+```python
+age = 25
+count = -10
+```
+
+The type is:
+
+```python
+int
+```
+
+Integers represent whole numbers.
+
+---
+
+## Float
+
+```python
+price = 99.0
+percentage = 88.75
+```
+
+The type is:
+
+```python
+float
+```
+
+Floats represent numbers containing a fractional part.
+
+---
+
+## Complex
+
+```python
+z = 3 + 4j
+```
+
+The type is:
+
+```python
+complex
+```
+
+Complex numbers contain a real and imaginary component.
+
+---
+
+# 10. Boolean Type
+
+Python has two Boolean values:
+
+```python
+True
+False
+```
+
+They must start with a capital letter.
+
+Example:
+
+```python
 is_active = True
 is_logged_in = False
+```
 
-print(bool(0))       # False
-print(bool(""))      # False
-<<<<<<< HEAD
-print(bool("hello")) # True
-Many values have a truth value. For example, zero and empty containers are falsey; most other values are truthy.
+Boolean values are commonly used in conditions.
 
-6. Strings
-A string is an immutable sequence of characters. Use square brackets to access characters by index:
-print(bool("hello")) # True
+```python
+if is_active:
+    print("Account is active")
+```
 
+---
 
-### 6. Strings
+# 11. Truth Values
 
-A string is an immutable sequence of characters. Indexing starts at zero.
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+Many Python objects can be evaluated as either truthy or falsy.
+
+Examples:
+
+```python
+print(bool(0))
+print(bool(""))
+print(bool("hello"))
+```
+
+Output:
+
+```text
+False
+False
+True
+```
+
+Common falsy values include:
+
+* `0`
+* `0.0`
+* `False`
+* `None`
+* Empty strings
+* Empty lists
+* Empty tuples
+* Empty dictionaries
+* Empty sets
+
+Most other objects are truthy.
+
+---
+
+# 12. Strings
+
+A string is an **immutable sequence of characters**.
+
+Example:
 
 ```python
 name = "Aishu"
-print(name[0])  # A
-print(name[1])  # i
-<<<<<<< HEAD An attempt to assign to name[0] raises a TypeError; create a new string instead.
+```
 
-7. Lists
-Lists are ordered and mutable, allow duplicate values, and can contain values of different types.
-7. Lists
-Lists are ordered and mutable, allow duplicates, and can contain values of different types.
+Characters can be accessed using indexes.
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+Python indexing starts at `0`.
 
+```python
+print(name[0])
+print(name[1])
+```
+
+Output:
+
+```text
+A
+i
+```
+
+Conceptually:
+
+```text
+A i s h u
+0 1 2 3 4
+```
+
+Because strings are immutable, you cannot directly change an individual character.
+
+For example:
+
+```python
+name[0] = "B"
+```
+
+raises a `TypeError`.
+
+Instead, create a new string.
+
+---
+
+# 13. Lists
+
+Lists are:
+
+* Ordered
+* Mutable
+* Able to contain duplicate values
+* Able to contain different data types
+
+Example:
+
+```python
 numbers = [10, 20, 30]
+```
+
+A list can contain different types:
+
+```python
 data = [10, "python", 25.5, True]
-<<<<<<< HEAD
+```
 
-8. Tuples
-Tuples are ordered and immutable, and they allow duplicate values.
-8. Tuples
-Tuples are ordered and immutable, and they allow duplicates.
+Lists are mutable, meaning their contents can be changed.
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+Example:
 
+```python
+numbers = [10, 20, 30]
+
+numbers.append(40)
+
+print(numbers)
+```
+
+Output:
+
+```text
+[10, 20, 30, 40]
+```
+
+---
+
+# 14. Tuples
+
+Tuples are:
+
+* Ordered
+* Immutable
+* Able to contain duplicate values
+
+Example:
+
+```python
 point = (10, 20)
-<<<<<<< HEAD
+```
 
-9. Sets
-Sets are mutable collections of unique elements. They do not support positional indexing. An empty set is written as set() because {} creates an empty dictionary.
+Unlike lists, tuple contents cannot normally be changed after creation.
 
+---
+
+# 15. Sets
+
+A set is a mutable collection of **unique elements**.
+
+Example:
+
+```python
 numbers = {10, 10, 20, 30}
-print(numbers)  # contains 10, 20, and 30; display order is not guaranteed
-10. Dictionaries
-Dictionaries store key-value pairs. Keys must be hashable; values can be of any type.
 
+print(numbers)
+```
+
+The duplicate `10` is stored only once.
+
+Conceptually, the set contains:
+
+```text
+10
+20
+30
+```
+
+Sets do not support positional indexing.
+
+This will not work:
+
+```python
+numbers[0]
+```
+
+An empty set is created using:
+
+```python
+set()
+```
+
+because:
+
+```python
+{}
+```
+
+creates an empty dictionary.
+
+For an immutable set, Python provides:
+
+```python
+frozenset()
+```
+
+---
+
+# 16. Dictionaries
+
+A dictionary stores data as **key-value pairs**.
+
+Example:
+
+```python
 student = {
     "id": 101,
     "name": "Aishu",
-    "marks": 85.5,
+    "marks": 85.5
 }
-11. None
-None represents the absence of a value. It is a distinct object, not the same as 0, False, an empty string, or an empty list.
-9. Sets
-Sets are mutable collections of unique elements. They are not indexed by position.
+```
 
-numbers = {10, 10, 20, 30}
-print(numbers)  # Contains 10, 20, and 30; order is not a positional guarantee
-Use frozenset for an immutable set.
+Here:
 
-10. Dictionaries
-Dictionaries store key-value pairs.
+```text
+"id"     → 101
+"name"   → "Aishu"
+"marks"  → 85.5
+```
 
-student = {
-	"id": 101,
-	"name": "Aishu",
-	"marks": 85.5,
-}
-11. None
-None represents the absence of a value. It is different from 0, False, an empty string (""), and an empty list ([]); each has a different meaning and type.
+Dictionary keys must be hashable.
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+Values can be of many different types.
 
+Accessing a value:
+
+```python
+print(student["name"])
+```
+
+Output:
+
+```text
+Aishu
+```
+
+---
+
+# 17. None
+
+`None` represents the absence of a value.
+
+Example:
+
+```python
 result = None
-<<<<<<< HEAD Use is None when checking for it:
+```
 
+`None` is different from:
+
+```text
+0
+False
+""
+[]
+```
+
+These values have different meanings and types.
+
+To check for `None`, use:
+
+```python
 if result is None:
     print("No result yet")
-12. Mutable and immutable objects
-An immutable object's value cannot be changed after it is created. Common immutable types include int, float, bool, str, tuple, and frozenset.
+```
 
-Mutable objects can be changed in place. Common mutable types include list, dict, set, and bytearray.
+Use `is None` rather than:
 
-13. Rebinding a name
-When you assign a new value to a name, Python binds the name to another object. It does not modify the original integer:
-12. Mutable and immutable objects
-An immutable object cannot be changed after it is created. Common immutable types include int, float, bool, str, tuple, and frozenset.
+```python
+result == None
+```
 
-Mutable objects can be changed in place. Common mutable types include list, set, dict, and bytearray.
+---
 
-13. Rebinding a name
-When an immutable value appears to change, the name is usually being bound to a different object; the original object was not modified.
+# 18. Mutable and Immutable Objects
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+This is an important Python interview concept.
 
+## Immutable Objects
+
+An immutable object's value cannot be changed after the object is created.
+
+Common immutable types include:
+
+```text
+int
+float
+bool
+str
+tuple
+frozenset
+```
+
+Example:
+
+```python
 x = 10
+
 x = 20
-After the first assignment, x refers to 10; after the second, it refers to 20. The integer 10 was not changed.
+```
 
-<<<<<<< HEAD
+It may look like the value `10` changed into `20`, but that is not what happened.
 
-14. Two names referring to one object
-=======
+Instead:
 
-14. Two names bound to one immutable object
-c0fb686431bcb9b640cf41b3a530d4031041d080
+```text
+Before:
 
+x ─────> 10
+
+After:
+
+x ─────> 20
+```
+
+The name `x` was rebound to another object.
+
+---
+
+## Mutable Objects
+
+Mutable objects can be changed in place.
+
+Common mutable types include:
+
+```text
+list
+dict
+set
+bytearray
+```
+
+Example:
+
+```python
+numbers = [10, 20]
+
+numbers.append(30)
+
+print(numbers)
+```
+
+Output:
+
+```text
+[10, 20, 30]
+```
+
+The existing list was modified.
+
+---
+
+# 19. Rebinding a Name
+
+Consider:
+
+```python
+x = 10
+
+x = 20
+```
+
+After the first assignment:
+
+```text
+x ─────> 10
+```
+
+After the second assignment:
+
+```text
+x ─────> 20
+```
+
+The integer `10` was not modified.
+
+The name `x` was simply **rebound** to another object.
+
+---
+
+# 20. Two Names Referring to One Immutable Object
+
+Consider:
+
+```python
 a = 10
+
 b = a
-<<<<<<< HEAD
-Both names refer to the integer object representing 10. If a is later rebound to 20, b still refers to 10.
+```
 
+Conceptually:
+
+```text
+a ─────┐
+       ↓
+      10
+       ↑
+b ─────┘
+```
+
+Both names refer to the integer object representing `10`.
+
+Now:
+
+```python
 a = 20
-print(b)  # 10
-15. Aliasing a mutable object
-Assigning a list to another name does not make a copy. Both names refer to the same list:
-a = 20
+```
 
-print(a) # 20 print(b) # 10
+This does not change `b`.
 
+```python
+print(a)
+print(b)
+```
 
-Initially, both names refer to the integer object `10`. Rebinding `a` does not rebind `b`.
+Output:
 
-### 15. Two names referring to one mutable object
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+```text
+20
+10
+```
+
+Why?
+
+Because `a = 20` rebinds `a`.
+
+It does not change the object referred to by `b`.
+
+---
+
+# 21. Aliasing a Mutable Object
+
+Consider:
 
 ```python
 a = [10, 20]
+
 b = a
+
 b.append(30)
-<<<<<<< HEAD
 
-print(a)  # [10, 20, 30]
-append() changes that list in place, so the change is visible through either name.
+print(a)
+```
 
-16. == versus is
-== checks whether two objects have equal values.
-is checks whether two names refer to the very same object. ======= print(a) # [10, 20, 30]
+Output:
 
-Both names refer to the same list. `append()` mutates that list, so the change is visible through either name.
+```text
+[10, 20, 30]
+```
 
-### 16. `==` versus `is`
+Why?
 
-`==` compares values for equality. `is` checks whether two names refer to the very same object.
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+Because both names refer to the same list.
+
+```text
+a ─────┐
+       ↓
+ [10, 20]
+       ↑
+b ─────┘
+```
+
+After:
+
+```python
+b.append(30)
+```
+
+the shared list becomes:
+
+```text
+[10, 20, 30]
+```
+
+Therefore, both `a` and `b` see the change.
+
+---
+
+# 22. `==` vs `is`
+
+This is an important interview question.
+
+## `==`
+
+`==` checks whether two objects have equal values.
+
+Example:
 
 ```python
 a = [1, 2]
 b = [1, 2]
 
-print(a == b)  # True: equal contents
-print(a is b)  # False: distinct list objects
-<<<<<<< HEAD Use is for identity checks such as value is None, not as a general replacement for ==.
+print(a == b)
+```
 
-17. Where does Python use memory?
-While a Python program runs, memory is used for objects such as integers, strings, lists, dictionaries, and functions, as well as runtime bookkeeping. In CPython, objects are managed by Python's memory allocator, which obtains memory from the underlying process and operating system. Exact allocation details differ between Python implementations.
+Output:
 
-18. Reference counting in CPython
-CPython primarily uses reference counting. Each object tracks references to it. Assigning another name creates another reference; removing a reference decreases the count.
+```text
+True
+```
 
+The lists contain equal values.
+
+---
+
+## `is`
+
+`is` checks whether two names refer to the **same object**.
+
+```python
+print(a is b)
+```
+
+Output:
+
+```text
+False
+```
+
+The two lists contain the same values, but they are separate list objects.
+
+Conceptually:
+
+```text
+a ─────> [1, 2]
+
+b ─────> [1, 2]
+```
+
+Two different objects.
+
+Therefore:
+
+```text
+a == b  → True
+a is b  → False
+```
+
+### Remember
+
+```text
+== → value equality
+is → object identity
+```
+
+Use `is` for identity checks such as:
+
+```python
+if result is None:
+    ...
+```
+
+Do not use `is` as a general replacement for `==`.
+
+---
+
+# 23. Where Does Python Use Memory?
+
+While a Python program is running, memory is used for:
+
+* Objects
+* Variables/names
+* Lists
+* Dictionaries
+* Strings
+* Functions
+* Execution state
+* Runtime bookkeeping
+
+Python manages this memory automatically.
+
+In CPython, objects are managed by Python's memory-management system.
+
+The exact implementation details can differ between Python implementations.
+
+---
+
+# 24. Reference Counting in CPython
+
+CPython primarily uses **reference counting**.
+
+Conceptually, an object keeps track of references to it.
+
+Example:
+
+```python
 a = [1, 2, 3]
-b = a  # a and b refer to the same list
-del b  # removes the name b; a still refers to the list
-This describes CPython's implementation, not a guarantee that every Python implementation uses reference counting in the same way.
 
-19. What is garbage collection?
-Garbage collection is automatic management that identifies objects that are no longer needed and makes their memory available for reuse. In Python, programmers normally do not manually free object memory.
+b = a
+```
 
-20. Reference counting and cyclic garbage collection
-Reference counting can reclaim an object when its reference count reaches zero. But a group of objects can refer to one another and keep their counts above zero even when the group is unreachable from the rest of the program. CPython's cyclic garbage collector can detect and clean up many such cycles.
+Now both `a` and `b` refer to the same list.
 
-items = []
-items.append(items)  # the list refers to itself
-The gc module provides controls for CPython's cyclic garbage collector, but most programs do not need to manage it directly.
+```text
+a ─────┐
+       ↓
+   [1, 2, 3]
+       ↑
+b ─────┘
+```
 
-21. What does del do?
-del removes a name or an item; it does not directly command Python to destroy an object. If another reference exists, the object remains accessible:
-Use is None when checking for None. Do not use is as a substitute for value equality.
+If we remove:
 
-17. Where does Python use memory?
-A Python program uses memory for objects such as integers, strings, dictionaries, lists, and functions, as well as for its runtime and execution state. Python manages object memory dynamically. In CPython, objects are managed by Python's memory allocator, which obtains memory from the process and ultimately the operating system. Exact implementation details vary across Python implementations.
+```python
+del b
+```
 
-18. Reference counting in CPython
-CPython primarily uses reference counting. Conceptually, when another name refers to an object, that is another reference; removing a reference can decrease the count.
+the name `b` is removed.
 
-a = [1, 2, 3]
-b = a  # Both names refer to the same list.
-del b  # Removes the name b; a still refers to the list.
-This is a conceptual explanation, not a reliable way to inspect an exact count: temporary references and implementation details affect observed counts.
+But `a` still refers to the list:
 
-19. Garbage collection
-Garbage collection is automatic memory management that reclaims objects the program can no longer reach. Python programmers normally do not manually free object memory.
+```text
+a ─────> [1, 2, 3]
+```
 
-20. Reference counting and cyclic garbage collection
-Reference counting can reclaim many objects when their reference count reaches zero. It cannot, by itself, reclaim objects that only refer to each other in a cycle. CPython's cyclic garbage collector can detect and collect many unreachable cycles.
+Therefore, the list remains reachable.
 
-a = []
-a.append(a)  # The list refers to itself, creating a cycle.
-21. What does del do?
-del removes a name or reference; it does not guarantee that the object is immediately destroyed.
+Reference counting is primarily a **CPython implementation detail**, not a guarantee that every Python implementation works exactly this way.
 
-c0fb686431bcb9b640cf41b3a530d4031041d080
+---
 
-numbers = [1, 2, 3]
-b = numbers
-del numbers
-<<<<<<< HEAD
+# 25. What Does `del` Do?
 
-print(b)  # [1, 2, 3]
-22. When can an object be reclaimed?
-When no references to an object remain, it is no longer reachable through those references and its memory can be reclaimed. In CPython, an object with no references is often reclaimed promptly, except for cases such as reference cycles. Other Python implementations may behave differently, so do not rely on exact timing.
-print(b) # [1, 2, 3]
+`del` removes a name, reference, or item.
 
+It does **not directly command Python to destroy an object**.
 
-The list remains reachable through `b`.
-
-### 22. When can an object be reclaimed?
-
-An object becomes eligible for reclamation when it is no longer reachable. In CPython, an object with no remaining references is often reclaimed promptly, but cycles and implementation details can affect when that happens. The exact timing is not a general Python guarantee, and reclaimed memory is not necessarily returned to the operating system immediately.
->>>>>>> c0fb686431bcb9b640cf41b3a530d4031041d080
+Example:
 
 ```python
 numbers = [1, 2, 3]
+
 b = numbers
+
 del numbers
-<<<<<<< HEAD
+
+print(b)
+```
+
+Output:
+
+```text
+[1, 2, 3]
+```
+
+Why does the list still exist?
+
+Because `b` still refers to it.
+
+Conceptually:
+
+```text
+numbers ──X
+
+b ────────> [1, 2, 3]
+```
+
+The list is still reachable.
+
+---
+
+# 26. Garbage Collection
+
+Garbage collection is automatic memory management.
+
+It identifies objects that the program can no longer reach and allows their memory to be reclaimed.
+
+Python programmers normally do not manually free object memory.
+
+For example:
+
+```python
+numbers = [1, 2, 3]
+
+del numbers
+```
+
+If there are no other references to that list, the object may become eligible for reclamation.
+
+However, becoming unreachable does not mean that the operating system's memory usage will immediately decrease.
+
+Python may keep reclaimed memory available for future allocations.
+
+---
+
+# 27. Reference Counting and Cyclic Garbage Collection
+
+Reference counting can reclaim many objects when their reference count reaches zero.
+
+However, reference counting alone cannot handle every situation.
+
+Consider a circular reference:
+
+```python
+a = []
+
+a.append(a)
+```
+
+The list contains a reference to itself.
+
+Conceptually:
+
+```text
+a ─────> [ reference to itself ]
+           ↑              |
+           └──────────────┘
+```
+
+This creates a cycle.
+
+Even if the object is no longer reachable from the rest of the program, the references inside the cycle can prevent simple reference counting from reaching zero.
+
+CPython therefore also has a **cyclic garbage collector** that can detect and collect many unreachable reference cycles.
+
+The `gc` module provides controls for this system, but most programs do not need to manage it directly.
+
+---
+
+# 28. When Can an Object Be Reclaimed?
+
+An object becomes eligible for reclamation when it is no longer reachable by the program.
+
+Example:
+
+```python
+numbers = [1, 2, 3]
+
+b = numbers
+
+del numbers
+```
+
+The list is still reachable through:
+
+```python
+b
+```
+
+Now:
+
+```python
 del b
-After both names are removed, neither name refers to the list. Other references could still exist elsewhere.
+```
 
-23. A useful mental model
-name -> object (identity, type, value)
-                 |
-                 v
-       memory managed by Python
-                 |
-        object becomes unreachable
-                 |
-       memory may be reclaimed/reused
-Names refer to objects; objects occupy memory; the runtime manages that memory as objects are used and become unreachable.
+If no other references exist, the list is no longer reachable through these names.
 
-24. If Python has garbage collection, why doesn't del numbers always destroy an object immediately?
-Because del numbers removes the name numbers; it does not necessarily remove every reference to the object. Another name, a container, or a function may still refer to it. Cyclic references can also keep objects alive until the cyclic garbage collector handles them.
+In CPython, non-cyclic objects with no remaining references are often reclaimed promptly.
 
-Even after an object is reclaimed, Python's allocator may keep the freed memory available for reuse instead of returning it immediately to the operating system. Garbage collection is about making unreachable objects' memory reusable; it is not a promise that process memory usage will instantly decrease.
+However, the exact timing is not a general Python guarantee.
 
-Key takeaways
-A variable in Python is a name bound to an object.
-Objects have identity, type, and value.
-Assignment can create another reference rather than a copy.
-Mutable objects can change in place; immutable objects cannot.
-== compares values, while is compares identity.
-del removes a reference (such as a name); it does not guarantee immediate destruction or return of memory to the OS.
-CPython uses reference counting and a cyclic garbage collector; implementation details vary across Python implementations. ======= del b # No longer reachable through these two names.
+Also, reclaimed memory does not necessarily get returned immediately to the operating system.
 
-### 23. A conceptual model
+---
 
-**Name -> object (identity, type, value) -> managed memory -> unreachable object may be reclaimed.**
+# 29. Useful Mental Model
 
-This is a mental model, not a promise about the exact internal storage or reclamation timing.
+A useful beginner mental model is:
 
-### 24. Why doesn't `del numbers` necessarily destroy an object immediately?
+```text
+Name
+  |
+  ↓
+Object
+  |
+  ├── Identity
+  ├── Type
+  └── Value
+  |
+  ↓
+Memory managed by Python
+  |
+  ↓
+Object becomes unreachable
+  |
+  ↓
+Memory may eventually be reclaimed/reused
+```
 
-Because `del numbers` removes the name `numbers`; other names, containers, or parts of the program may still refer to the object. If it becomes unreachable, the runtime can reclaim it. CPython often reclaims non-cyclic objects promptly through reference counting, while cyclic garbage may be collected later. Python also does not guarantee that reclaimed memory is immediately returned to the operating system.
+The important idea is:
 
-## Memory allocation in Python
+> Names refer to objects, and Python manages the memory used by those objects.
 
-Python's language specification does not require one particular memory-management implementation. The following describes **CPython**, the most commonly used implementation.
+This is a conceptual model, not a guarantee about the exact internal storage used by the Python implementation.
 
-- Names are bindings in a scope, such as a function's local scope or a module's global scope.
-- Objects are managed by Python and are typically allocated on the heap. As in JavaScript, the simple rule "variables are on the stack and objects are on the heap" is not guaranteed by the language.
-- CPython primarily uses **reference counting**. References to an object are tracked; when the count reaches zero, CPython can usually reclaim the object promptly.
-- Reference counting alone cannot reclaim unreachable reference cycles. CPython also has a cyclic garbage collector to detect and collect many such cycles.
-- Other Python implementations can use different memory-management strategies. Code should not rely on immediate cleanup as a universal Python guarantee.
+---
 
-## Real-life example: an online shopping cart
+# 30. Why Doesn't `del` Always Destroy an Object Immediately?
 
-Imagine a shopping cart as a basket of items. A variable is like a label pointing to that basket. Two labels can point to the same basket; removing one label does not remove the basket if another label still points to it.
+Consider:
 
-### Node.js
+```python
+numbers = [1, 2, 3]
 
-```js
-function createCart() {
-	const cart = { items: ["book"] }; // Allocate a cart object.
-	const checkoutCart = cart; // Both names refer to the same object.
-	return checkoutCart;
+b = numbers
+
+del numbers
+```
+
+`del numbers` only removes the name `numbers`.
+
+The object is still referenced by:
+
+```python
+b
+```
+
+Therefore, it remains reachable.
+
+Only after all relevant references are removed can the object become unreachable.
+
+Even then, the exact time of reclamation depends on the Python implementation and circumstances such as reference cycles.
+
+---
+
+# 31. Real-Life Example — Online Shopping Cart
+
+Imagine an online shopping cart as a basket.
+
+A variable is like a **label pointing to the basket**.
+
+Two labels can point to the same basket.
+
+Removing one label does not remove the basket if another label still points to it.
+
+---
+
+## Python Example
+
+```python
+def create_cart():
+
+    cart = {
+        "items": ["book"]
+    }
+
+    checkout_cart = cart
+
+    return checkout_cart
+
+
+active_cart = create_cart()
+
+order_history = [active_cart]
+
+del active_cart
+
+order_history.clear()
+```
+
+### Step-by-step
+
+Inside the function:
+
+```python
+cart = {
+    "items": ["book"]
+}
+```
+
+creates a cart object.
+
+Then:
+
+```python
+checkout_cart = cart
+```
+
+creates another reference to the same object.
+
+Then:
+
+```python
+return checkout_cart
+```
+
+returns that object.
+
+The object continues to exist because:
+
+```python
+active_cart
+```
+
+refers to it.
+
+Then:
+
+```python
+order_history = [active_cart]
+```
+
+creates another reference through the list.
+
+Now:
+
+```python
+del active_cart
+```
+
+removes only the `active_cart` name.
+
+The object still exists because:
+
+```python
+order_history
+```
+
+refers to it.
+
+Finally:
+
+```python
+order_history.clear()
+```
+
+removes the reference from the list.
+
+If no other references exist, the cart becomes unreachable.
+
+In CPython, reference counting can often reclaim such an object promptly.
+
+---
+
+# 32. Stack and Heap Analogy
+
+A common analogy is:
+
+```text
+Function call → temporary workspace
+Object        → data stored in managed memory
+```
+
+Imagine a worker using a temporary clipboard while handling an order.
+
+The clipboard contains temporary task information.
+
+The shopping cart is like a basket stored in a shared stockroom.
+
+When the worker finishes, the clipboard is no longer available to that task.
+
+However, the basket can remain if another worker or the order-history system still has a reference to it.
+
+This is only an analogy.
+
+It is **not** a literal rule that:
+
+```text
+Every variable → stack
+Every object   → heap
+```
+
+Python implementations can optimize how values and objects are stored.
+
+---
+
+# 33. Memory Allocation in Python — CPython
+
+The following describes **CPython**, the most commonly used Python implementation.
+
+* Names are bindings in a scope, such as a function's local scope or a module's global scope.
+* Objects are managed by Python and are typically allocated in managed memory.
+* CPython primarily uses reference counting.
+* References to objects are tracked.
+* When an object's reference count reaches zero, CPython can usually reclaim it promptly.
+* Reference counting alone cannot handle unreachable reference cycles.
+* CPython also has a cyclic garbage collector.
+* Other Python implementations may use different memory-management strategies.
+* Python code should not depend on exact cleanup timing.
+
+---
+
+# 34. Comparison — Node.js and Python
+
+| Topic                         | Node.js                                        | Python / CPython                                                               |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------ |
+| Variable                      | Name/reference to a value                      | Name bound to an object                                                        |
+| Function scope                | Local bindings exist within function execution | Local names exist within function scope                                        |
+| Object memory                 | Managed by V8                                  | Managed by Python runtime                                                      |
+| Garbage collection            | V8 garbage collector                           | CPython reference counting + cyclic GC                                         |
+| Exact cleanup time            | Not guaranteed                                 | Often prompt for non-cyclic objects in CPython, but not universally guaranteed |
+| Objects can outlive functions | Yes, if referenced                             | Yes, if referenced                                                             |
+| Unwanted memory retention     | Objects remain reachable unintentionally       | Objects remain referenced unintentionally                                      |
+| Cyclic references             | Garbage collector handles them                 | CPython cyclic GC handles many cycles                                          |
+
+---
+
+# 35. Node.js Example
+
+Node.js uses JavaScript running on the V8 engine.
+
+Example:
+
+```javascript
+function makeCounter() {
+
+    let count = 0;
+
+    return () => ++count;
 }
 
-let activeCart = createCart(); // The object outlives createCart().
-const orderHistory = [activeCart]; // History keeps the object reachable.
-activeCart = null; // Removes this reference, but history still holds it.
-orderHistory.length = 0; // No longer retained here; V8 may collect it later.
-The function's local names stop being available when createCart returns, but the returned cart remains alive through activeCart. Later, orderHistory keeps it alive even after activeCart is set to null. Once no reachable part of the program refers to the cart, V8 can reclaim it during a future garbage-collection cycle.
+const next = makeCounter();
 
-Python
-def create_cart():
-		cart = {"items": ["book"]}  # Allocate a cart object.
-		checkout_cart = cart  # Both names refer to the same object.
-		return checkout_cart
+console.log(next());
+```
 
-active_cart = create_cart()  # The object outlives create_cart().
-order_history = [active_cart]  # History keeps the object referenced.
-del active_cart  # Removes this name; order_history still refers to the object.
-order_history.clear()  # Removes the remaining application reference.
-In CPython, when the last reference to an object is removed, reference counting can usually reclaim it promptly. del active_cart only removes the name active_cart; it does not force the object to be destroyed if order_history or another name still refers to it. Reclaiming the object's memory also does not guarantee that Python immediately returns that memory to the operating system.
+Output:
 
-Stack and heap analogy
-Think of a function call as a worker's temporary clipboard and the cart object as a basket stored in a shared stockroom. The clipboard holds temporary task details while the worker is handling a request. The basket can remain after that task ends if another worker or the order-history system still has its location. This is only an analogy: language runtimes optimize storage, so it is not a literal rule that every variable lives on a stack and every object lives on a heap.
+```text
+1
+```
 
-Comparison
-Topic	Node.js	Python (CPython)
-Variable	A name bound to a value	A name bound to an object/value
-When scope ends	The name may stop being accessible	The name may stop being accessible
-How unused objects are reclaimed	V8 garbage-collects unreachable objects	Reference counting often reclaims objects promptly; cyclic GC handles many cycles
-Exact cleanup time	Not guaranteed	Often prompt in CPython, but not guaranteed across Python implementations
-Common way to retain unwanted memory	Keeping objects reachable unintentionally	Keeping references, or retaining objects that participate in cycles
-Memory leaks
-In garbage-collected languages, a memory leak often means that the program unintentionally keeps references to data it no longer needs. A growing cache, an event-listener collection that is never cleared, or a closure retaining a large object can all keep memory reachable and prevent reclamation.
+Normally, `count` would be a local variable of `makeCounter()`.
 
-Garbage collection reclaims memory for objects the runtime considers unreachable. It does not guarantee that the process immediately returns that memory to the operating system; a runtime may keep reclaimed space available for future allocations.
+However, the returned function still refers to `count`.
+
+Therefore, the state represented by `count` remains reachable after `makeCounter()` returns.
+
+This is an example of a **closure**.
+
+---
+
+# 36. Python Equivalent Concept
+
+Python can also keep objects alive after a function returns when another reference retains them.
+
+Example:
+
+```python
+def make_counter():
+
+    count = 0
+
+    def next_count():
+
+        nonlocal count
+
+        count += 1
+
+        return count
+
+    return next_count
+
+
+next_count = make_counter()
+
+print(next_count())
+print(next_count())
+```
+
+Output:
+
+```text
+1
+2
+```
+
+The inner function retains access to `count`.
+
+Therefore, the state survives after `make_counter()` returns.
+
+This is also an example of a **closure**.
+
+---
+
+# 37. Memory Leaks in Garbage-Collected Languages
+
+Garbage collection does not mean memory can never be wasted.
+
+A memory leak can occur when a program unintentionally keeps references to objects it no longer needs.
+
+Examples include:
+
+* A cache that keeps growing
+* Event listeners that are never removed
+* Global collections that continuously grow
+* Closures retaining large objects
+* Objects stored unnecessarily in long-lived data structures
+
+The garbage collector cannot reclaim an object if the program still has a reachable reference to it.
+
+For example:
+
+```python
+cache = []
+
+while True:
+    cache.append(large_object)
+```
+
+If the list continues to hold references to objects, those objects remain reachable.
+
+Therefore, garbage collection cannot reclaim them.
+
+---
+
+# 38. Garbage Collection Does Not Mean Memory Immediately Goes Back to the OS
+
+This is an important distinction.
+
+When Python reclaims an object:
+
+```text
+Object becomes unreachable
+        ↓
+Object memory can be reused
+```
+
+It does **not** necessarily mean:
+
+```text
+Memory immediately returned to operating system
+```
+
+Python's memory allocator may keep the memory so that it can be reused by the Python process.
+
+Therefore:
+
+```text
+Garbage collection
+        ≠
+Immediately reducing OS-level process memory
+```
+
+---
+
+# 39. Key Takeaways
+
+1. A Python variable is a **name bound to an object**.
+2. Python values are represented as **objects**.
+3. Objects have **identity, type, and value**.
+4. Assignment creates or changes a name-to-object binding.
+5. Assignment does not necessarily create a copy.
+6. Two names can refer to the same object.
+7. Mutable objects can be changed in place.
+8. Immutable objects cannot be changed after creation.
+9. `==` compares values.
+10. `is` compares object identity.
+11. `id()` provides an object's identity during its lifetime.
+12. `type()` tells you the object's type.
+13. `del` removes a name/reference; it does not guarantee immediate destruction.
+14. Objects can outlive the function that created them if another reference exists.
+15. CPython primarily uses reference counting.
+16. CPython also has cyclic garbage collection.
+17. An object becomes eligible for reclamation when it is no longer reachable.
+18. Reclaimed memory may be reused by Python rather than immediately returned to the operating system.
+19. Exact memory-management behavior can vary between Python implementations.
+20. Garbage collection cannot reclaim objects that are still reachable, even if the program no longer logically needs them.
+
+---
+
+# 40. One-Line Interview Summary
+
+> **In Python, variables are names bound to objects; objects have identity, type, and value, and Python manages their memory automatically. CPython primarily uses reference counting along with cyclic garbage collection to reclaim unreachable objects.**

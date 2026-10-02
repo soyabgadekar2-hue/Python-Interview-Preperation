@@ -5,9 +5,9 @@
 Without a function, repeated work can mean writing the same code many times:
 
 ```python
-print("aishu")
-print("aishi")
-print("aishiii")
+print("Soyab")
+print("Aditya")
+print("Afrid")
 ```
 
 A function lets us reuse that behavior with different values:
@@ -17,9 +17,9 @@ def welcome(name):
     print("Welcome", name)
 
 
-welcome("aishu")
-welcome("ashaa")
-welcome("ashwini")
+welcome("Soyab")
+welcome("Aditya")
+welcome("Afrid")
 ```
 
 Functions help with:
@@ -78,10 +78,10 @@ def welcome(name):
     print("Welcome", name)
 
 
-welcome("Aisi")
+welcome("Soyab")
 ```
 
-Here, `name` is the parameter and `"Aisi"` is the argument.
+Here, `name` is the parameter and `"Soyab"` is the argument.
 
 ## 6. Multiple parameters
 
@@ -141,12 +141,12 @@ print(multiplication) # 50
 A default parameter value is used when the caller does not provide an argument for that parameter.
 
 ```python
-def greet(name="Aishu"):
+def greet(name="Soyab"):
     print("Hello", name)
 
 
-greet()          # Hello Aishu
-greet("Ashwini") # Hello Ashwini
+greet()          # Hello Soyab
+greet("Ashwini") # Hello Afrid
 ```
 
 Defaults are useful when a value is commonly the same, but callers should still be able to provide another value.
@@ -160,7 +160,7 @@ def student(name, age):
     print(name, age)
 
 
-student("Aishu", 21)
+student("Soyab", 21)
 ```
 
 ## 12. Keyword arguments
@@ -172,7 +172,7 @@ def student(name, age):
     print(name, age)
 
 
-student(age=21, name="Aishu")
+student(age=21, name="Soyab")
 ```
 
 ## 13. Positional and keyword arguments together
@@ -184,7 +184,7 @@ def student(name, age, course):
     print(name, age, course)
 
 
-student("Aishu", age=21, course="BCA")
+student("Soyab", age=21, course="BCA")
 ```
 
 This is invalid because a positional argument follows a keyword argument:
@@ -222,7 +222,7 @@ def student(**details):
     print(details)
 
 
-student(name="Aishu", age=21, course="BCA")
+student(name="Soyab", age=21, course="BCA")
 ```
 
 ## 16. Combining parameters, `*args`, and `**kwargs`
